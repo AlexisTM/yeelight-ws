@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yee control</title>
+    <link rel="stylesheet" type="text/css" href="huebee.css">
+    <script src="robustws.js"></script>
+    <script src="huebee.pkgd.min.js"></script>
+    <script src="vue.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <ul>
+            <li v-for="value in lights">
+                {{ value.name }}
+            </li>
+        </ul>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

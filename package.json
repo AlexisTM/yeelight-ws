@@ -7,7 +7,7 @@
     "bufferutil": "^4.0.1",
     "utf-8-validate": "^5.0.2",
     "ws": "^6.1.2",
-    "yeelight-platform": "git+https://github.com/alexistm/yeelight-platform.git#custom_param_poll"
+    "yeelight-platform": "git+https://github.com/alexistm/yeelight-platform.git#rename_events"
   },
   "devDependencies": {},
   "scripts": {
