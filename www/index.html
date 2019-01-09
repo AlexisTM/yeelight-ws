@@ -2,20 +2,43 @@
 <html>
 <head>
     <title>Yee control</title>
-    <link rel="stylesheet" type="text/css" href="huebee.css">
-    <script src="robustws.js"></script>
-    <script src="huebee.pkgd.min.js"></script>
-    <script src="vue.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/huebee.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/robustws.js"></script>
+    <script src="js/huebee.pkgd.min.js"></script>
+    <script src="js/vue.min.js"></script>
 </head>
 <body>
     <div id="app">
+        <table class="fixed_header" id="tablefrom">
+            <thead>
+                <tr>
+                    <th>Available lights</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="value in lights">
+                    <td v-bind:class="{ selected: value.isSelected }" onclick="selectLight(this)">{{value.name}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <div>
+            <input class="color-input"/><br />
+            Brightness
+            <input type="range" min="1" max="100" value="50" class="slider">
+            Temperature
+            <input type="range" min="2700" max="6500" value="3500" class="slider">
+        </div>
         <ul>
             <li v-for="value in lights">
                 {{ value.name }}
+                </div>
             </li>
         </ul>
     </div>
 
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
