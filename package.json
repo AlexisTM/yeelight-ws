@@ -5,9 +5,10 @@
   "main": "index.js",
   "dependencies": {
     "bufferutil": "^4.0.1",
+    "express": "^4.16.4",
     "utf-8-validate": "^5.0.2",
     "ws": "^6.1.2",
-    "yeelight-platform": "git+https://github.com/alexistm/yeelight-platform.git#rename_events"
+    "yeelight-platform": "git+https://github.com/alexistm/yeelight-platform.git#master"
   },
   "devDependencies": {},
   "scripts": {

@@ -1,15 +1,24 @@
+const express = require('express');
+const app = express()
+const port = 3000
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 3030, clientTracking: true });
 const YeeDevice = require('yeelight-platform').Device;
+const YeeConstants = require('yeelight-platform').Constants;
 const attributes_names = ['name', 'active_mode', 'power', 'bright', 'ct', 'bg_power', 'bg_hue', 'bg_rgb', 'bg_sat', 'bg_ct'];
 
 var lights = [];
 
-function addLight(name, ip) {
+function addLight(name, ip, model=undefined) {
   let light = {
     name: name,
-    device: new YeeDevice({host: ip, port: 55443,
-    attributes: attributes_names, id: lights.length+1})
+    device: new YeeDevice({
+      host: ip, 
+      port: 55443,
+      attributes: attributes_names, 
+      id: lights.length+1,
+      model: model 
+    })
   }
   lights.push(light);
 }
@@ -24,12 +33,36 @@ function send(topic, data) {
   }
 }
 
-addLight("living", "192.168.178.32");
-addLight("dining", "192.168.178.33");
+// Could be fetch via discovery service.
+addLight("living", "192.168.178.32", "ceiling4");
+addLight("dining", "192.168.178.33", "ceiling4");
 
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
-    console.log(message)
+    try {
+      let msg = JSON.parse(message);
+      let targets = lights.filter(light => msg.lights.indexOf(light.device.attributes.name) >= 0);
+      if (msg.topic == "hsv") {
+        for (const target of targets) {
+          if(target.device.model == "ceiling4") {
+            target.device.sendCommand('bg_set_hsv', msg.data)
+          } else {
+            target.device.sendCommand('set_hsv', msg.data)
+          }
+        }
+      } else {
+        if(YeeConstants.methods.indexOf(msg.topic) < 0) {
+          console.log("What to do with this?", msg);
+          return;
+        }
+        for (const target of targets) {
+          console.log("Sending a raw message");
+          target.device.sendCommand(msg.topic, msg.data)
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
   });
   for(light of lights) {
     if(light.device.attributes.name != null)
@@ -46,3 +79,5 @@ for(let light of lights) {
   });
 }
 
+app.use(express.static('www'));
+app.listen(port,  () => console.log(`Example app listening on port ${port}!`));
