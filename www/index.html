@@ -3,11 +3,11 @@
 <head>
     <title>Yee control</title>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/huebee.css">
+    <link rel="stylesheet" type="text/css" href="css/colorjoe.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <script src="js/robustws.js"></script>
-    <script src="js/huebee.pkgd.min.js"></script>
     <script src="js/vue.min.js"></script>
+    <script src="js/colorjoe.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
@@ -36,8 +36,8 @@
                     <button type="button" onclick="lightToggleBg('off')" class="btn btn-dark btn-lg ">Ambiance Off</button>
                 </div>
                 <br/><br/>
-                Color:
-                <input class="color-input"/><br />
+                <h4 class="mx-auto">Color:</h4>
+                <div id="hslPicker"></div><br />
                 Brightness:
                 <input type="range" id="brightness" min="1" max="100" value="50" class="slider">
                 Temperature:

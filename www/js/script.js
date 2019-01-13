@@ -1,6 +1,6 @@
 var ws = {};
 var app = {};
-var hue = {};
+var test = {}
 function addToListByName(value) {
   let index = app.lights.findIndex(function(element, b) {
     return element.name == value.name;
@@ -63,6 +63,12 @@ function temperatureChange(evt) {
   cmdLights("set_ct_abx", [parseInt(this.value), "smooth", 300]);
 }
 
+function parseIntExcess(val, min, max) {
+  val = Math.round(parseFloat(val));
+  if(val > max) val = max;
+  if(val < min) val = min;
+  return val;
+}
 
 window.onload = function() {
   app = new Vue({
@@ -85,7 +91,6 @@ window.onload = function() {
 
   ws = new RobustWebSocket("ws://" + document.location.hostname + ":3030");
   ws.addEventListener('message', function(event) {
-    // console.log('we got: ' + event.data)
     let msg = JSON.parse(event.data);
     if(msg.topic == "heartbeat") {
       msg.data.elem = msg.data.name.replace(/ /g,"_");
@@ -93,19 +98,15 @@ window.onload = function() {
     }
   });
 
-  hue = new Huebee('.color-input', {
-    saturations: 10,
-    hues: 20,
-    shades: 1
-  });
-
-  hue.on('change', function(color, hue, sat, lum) {
-    console.log(color, parseInt(hue), parseInt(sat*100), lum);
-    cmdLights("hsv", [parseInt(hue), parseInt(sat*100), 'smooth', 300]);
-  });
-
   let bright = document.getElementById('brightness');
   bright.addEventListener('change', brightnessChange);
   let temp = document.getElementById('temperature');
   temp.addEventListener('change', temperatureChange);
+
+
+  colorjoe.hsl('hslPicker', '#113c38').on("done", function(color){
+    let hue = parseIntExcess(color.hue()*360, 0, 359);
+    let sat = parseIntExcess(color.saturation()*100, 0, 100)
+    cmdLights("hsv", [hue, sat, 'smooth', 300]);
+  }).update();
 };
