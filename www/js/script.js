@@ -40,7 +40,7 @@ function send(topic, data, lights=[]) {
 
 function cmdLights(topic, data) {
   let lights = app.get_selected_names();
-  console.log(data);
+  console.log(topic, data);
   send(topic, data, lights);
 }
 
@@ -50,11 +50,18 @@ function lightToggle(state, mode=1) {
 
 function lightToggleBg(state, mode=1) {
   cmdLights("bg_set_power", [state, "smooth", 300, mode]);
+  if(state == 'on') {
+    cmdLights("bg_set_bright", [100, "smooth", 300]);
+  }
 }
 
 function brightnessChange(evt) {
   console.log(parseInt(this.value))
   cmdLights("set_bright", [parseInt(this.value), "smooth", 300]);
+}
+
+function bgBrightnessChange(evt) {
+  cmdLights("bg_set_bright", [parseInt(this.value), "smooth", 300]);
 }
 
 function temperatureChange(evt) {
@@ -100,6 +107,8 @@ window.onload = function() {
 
   let bright = document.getElementById('brightness');
   bright.addEventListener('change', brightnessChange);
+  let bgbright = document.getElementById('bg_brightness');
+  bgbright.addEventListener('change', bgBrightnessChange);
   let temp = document.getElementById('temperature');
   temp.addEventListener('change', temperatureChange);
 
