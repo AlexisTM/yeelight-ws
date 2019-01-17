@@ -17,7 +17,7 @@ function addToListByName(value) {
 
 function selectLight(el) {
   let index = app.lights.findIndex(function(value){
-    return value.name == el.textContent;
+    return value.name == el;
   });
   if(index >= 0) {
     app.lights[index].isSelected = !app.lights[index].isSelected;
@@ -65,9 +65,11 @@ function bgBrightnessChange(evt) {
 }
 
 function temperatureChange(evt) {
-  console.log(parseInt(this.value))
-  cmdLights("bg_set_ct_abx", [parseInt(this.value), "smooth", 300]);
   cmdLights("set_ct_abx", [parseInt(this.value), "smooth", 300]);
+}
+
+function bgTemperatureChange(evt) {
+  cmdLights("bg_set_ct_abx", [parseInt(this.value), "smooth", 300]);
 }
 
 function parseIntExcess(val, min, max) {
@@ -107,10 +109,12 @@ window.onload = function() {
 
   let bright = document.getElementById('brightness');
   bright.addEventListener('change', brightnessChange);
-  let bgbright = document.getElementById('bg_brightness');
-  bgbright.addEventListener('change', bgBrightnessChange);
   let temp = document.getElementById('temperature');
   temp.addEventListener('change', temperatureChange);
+  let bgbright = document.getElementById('bg_brightness');
+  bgbright.addEventListener('change', bgBrightnessChange);
+  let bgtemp = document.getElementById('bg_temperature');
+  bgtemp.addEventListener('change', bgTemperatureChange);
 
 
   colorjoe.hsl('hslPicker', '#113c38').on("done", function(color){

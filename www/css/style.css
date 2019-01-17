@@ -36,29 +36,23 @@
 }
 
 table {
-  overflow:auto;
-  display: inline-block;
-  border-collapse: collapse;
-  border: 2px solid rgb(200, 200, 200);
-  height: 100px;
-  margin: 10px;
-  padding: 5px;
-  width: 100%;
+  border: 1px solid rgb(200, 200, 200);
   min-width: 80px;
+}
+
+tr, tbody {
+  width: 100%;
 }
 
 tbody > tr:nth-child(even){
   background-color: #f2f2f2;
 }
 
-tbody > tr:hover {
-  background-color: #d2d2d2;
-}
-
-td.selected {
-  background-color: #91d178;
+.selected {
+  background-color: #91d178 !important;
 }
 
 .oned {
   display: none;
 }
+

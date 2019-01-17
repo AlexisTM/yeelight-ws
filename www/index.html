@@ -15,12 +15,26 @@
     <br>
     <div id="app" class="container">
         <div class="row">
-            <div class="col-auto">
+            <div class="col-auto mx-auto">
                 <h4 class="mx-auto">Light selection</h4>
-                <table class="fixed_header" id="tablefrom">
+                <table class="fixed_header table" id="tablefrom">
+                    <thead>
+                        <tr>
+                            <td>Name</td>
+                            <td>Type</td>
+                            <td>Power</td>
+                        </tr>
+                    </thead>
                     <tbody>
-                        <tr v-for="value in lights">
-                            <td v-bind:class="{ selected: value.isSelected }" onclick="selectLight(this)">{{value.name}}</td>
+                        <tr v-if="lights.length == 0">
+                            <td>None</td>
+                            <td>OFF</td>
+                            <td>- %</td>
+                        </tr>
+                        <tr v-bind:class="{ selected: value.isSelected }" v-for="value in lights" @click="selectLight(value.name)" >
+                            <td>{{value.name}}</td>
+                            <td class="text-center border-left">{{value.power == 'off' ? 'OFF' : value.active_mode ? 'MOON': 'SUN' }}</td>
+                            <td class="text-center border-left">{{value.power == 'off' ? '- ' : value.bright}}%</td>
                         </tr>
                     </tbody>
                 </table>
@@ -40,16 +54,22 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-auto">
+            <div class="col-auto mx-auto">
                 <div id="hslPicker"></div>
             </div>
             <div class="col">
+                <h4>Foreground</h4>
                 Brightness:
                 <input type="range" id="brightness" min="1" max="100" value="50" class="slider">
                 Temperature:
                 <input type="range" id="temperature" min="2700" max="6500" value="3500" class="slider">
-                Background brightness:
-                <input type="range" id="bg_brightness" min="1" max="100" value="3500" class="slider">
+            </div>
+            <div class="col">
+                <h4>Background</h4>
+                Brightness:
+                <input type="range" id="bg_brightness" min="1" max="100" value="50" class="slider">
+                Temperature:
+                <input type="range" id="bg_temperature" min="2700" max="6500" value="3500" class="slider">
             </div>
         </div>
         <div class="row" v-if="false" v-cloak>
