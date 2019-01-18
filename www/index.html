@@ -33,7 +33,7 @@
                         </tr>
                         <tr v-bind:class="{ selected: value.isSelected }" v-for="value in lights" @click="selectLight(value.name)" >
                             <td>{{value.name}}</td>
-                            <td class="text-center border-left">{{value.power == 'off' ? 'OFF' : value.active_mode ? 'MOON': 'SUN' }}</td>
+                            <td class="text-center border-left">{{value.power == 'off' ? 'OFF' : value.active_mode == '1' ? 'MOON': 'SUN' }}</td>
                             <td class="text-center border-left">{{value.power == 'off' ? '- ' : value.bright}}%</td>
                         </tr>
                     </tbody>
