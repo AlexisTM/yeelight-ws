@@ -2,12 +2,29 @@ const express = require('express');
 const app = express()
 const port = 3000
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 3030, clientTracking: true });
+const redis = require("redis");
+const client = redis.createClient({ host: '192.168.178.23' });
+const md5 = require('md5');
+const TokenGenerator = require('uuid-token-generator');
+const tokgen = new TokenGenerator();
+
+function verifyClient(info, done) {
+  console.log(info);
+  done(true);
+}
+
+const wss = new WebSocket.Server({ port: 3030, verifyClient:verifyClient, clientTracking: true });
 const YeeDevice = require('yeelight-platform').Device;
 const YeeConstants = require('yeelight-platform').Constants;
 const attributes_names = ['name', 'active_mode', 'power', 'bright', 'ct', 'bg_power', 'bg_hue', 'bg_rgb', 'bg_sat', 'bg_ct'];
 
 var lights = [];
+
+// Users: alexis, vorleak, test:test
+// client.keys('users/alexis', console.log)
+// users/alexis:tokens_hey
+
+const SECS_IN_A_DAY = 86400;
 
 function addLight(name, ip, model=undefined) {
   let light = {
@@ -80,4 +97,19 @@ for(let light of lights) {
 }
 
 app.use(express.static('www'));
+app.get("/login", function(req, res){
+  const {username, password} = req.query;
+  console.log(username, password)
+  if(username && password) {
+    client.get('users/' + username + ':mmd5', function(err, data) {
+      if(data == md5(password)) {
+        let token = tokgen.generate();
+        client.set('users/' + username + ':token', token, 'EX', 10*86400);
+        res.send(token);
+      }
+    });
+  } else {
+
+  }
+});
 app.listen(port,  () => console.log(`Example app listening on port ${port}!`));

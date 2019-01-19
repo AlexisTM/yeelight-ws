@@ -1,6 +1,7 @@
 var ws = {};
 var app = {};
-var test = {}
+var test = {};
+var key = {};
 function addToListByName(value) {
   let index = app.lights.findIndex(function(element, b) {
     return element.name == value.name;
@@ -31,6 +32,7 @@ function changeName() {
 
 function send(topic, data, lights=[]) {
   let msg = {
+    "key": key,
     "topic": topic,
     "data": data,
     "lights": lights
@@ -72,6 +74,17 @@ function bgTemperatureChange(evt) {
   cmdLights("bg_set_ct_abx", [parseInt(this.value), "smooth", 300]);
 }
 
+function login(username, password) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      console.log(this.responseText);
+    }
+  };
+  xhttp.open("GET", "login?username=" + username + "&password=" + password, true);
+  xhttp.send();
+}
+
 function parseIntExcess(val, min, max) {
   val = Math.round(parseFloat(val));
   if(val > max) val = max;
@@ -83,7 +96,10 @@ window.onload = function() {
   app = new Vue({
     el: '#app',
     data: {
-      lights: []
+      lights: [],
+      authenticated: false,
+      username: '',
+      password: ''
     },
     methods: {
       count_enabled: function(){
@@ -94,17 +110,15 @@ window.onload = function() {
       },
       get_selected_names: function(){
         return this.get_selected().map(v => v.name);
-      }
+      },
+      signin: function(evt) {
+        evt.preventDefault();
+        this.username = document.getElementById('username').value;
+        this.password = md5(document.getElementById('password').value);
+        this.authenticated = true;
+        return false;
+      },
     },
-  });
-
-  ws = new RobustWebSocket("ws://" + document.location.hostname + ":3030");
-  ws.addEventListener('message', function(event) {
-    let msg = JSON.parse(event.data);
-    if(msg.topic == "heartbeat") {
-      msg.data.elem = msg.data.name.replace(/ /g,"_");
-      addToListByName(msg.data);
-    }
   });
 
   let bright = document.getElementById('brightness');
@@ -116,10 +130,19 @@ window.onload = function() {
   let bgtemp = document.getElementById('bg_temperature');
   bgtemp.addEventListener('change', bgTemperatureChange);
 
-
   colorjoe.hsl('hslPicker', '#113c38').on("done", function(color){
     let hue = parseIntExcess(color.hue()*360, 0, 359);
     let sat = parseIntExcess(color.saturation()*100, 0, 100)
     cmdLights("hsv", [hue, sat, 'smooth', 300]);
   }).update();
+
+  ws = new RobustWebSocket("ws://" + document.location.hostname + ":3030");
+  ws.addEventListener('message', function(event) {
+    let msg = JSON.parse(event.data);
+    if(msg.topic == "heartbeat") {
+      msg.data.elem = msg.data.name.replace(/ /g,"_");
+      addToListByName(msg.data);
+    }
+  });
+
 };

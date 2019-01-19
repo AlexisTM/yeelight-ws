@@ -9,81 +9,106 @@
     <script src="js/robustws.js"></script>
     <script src="js/vue.min.js"></script>
     <script src="js/colorjoe.min.js"></script>
+    <script src="js/md5.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
     <br>
     <div id="app" class="container">
-        <div class="row">
-            <div class="col-auto mx-auto">
-                <h4 class="mx-auto">Light selection</h4>
-                <table class="fixed_header table" id="tablefrom">
-                    <thead>
-                        <tr>
-                            <td>Name</td>
-                            <td>Type</td>
-                            <td>Power</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-if="lights.length == 0">
-                            <td>None</td>
-                            <td>OFF</td>
-                            <td>- %</td>
-                        </tr>
-                        <tr v-bind:class="{ selected: value.isSelected }" v-for="value in lights" @click="selectLight(value.name)" >
-                            <td>{{value.name}}</td>
-                            <td class="text-center border-left">{{value.power == 'off' ? 'OFF' : value.active_mode == '1' ? 'MOON': 'SUN' }}</td>
-                            <td class="text-center border-left">{{value.power == 'off' ? '- ' : value.bright}}%</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="col">
-                <h4 class="mx-auto">Control</h4>
-                <div class="btn-group" style="width: 100%">
-                    <button type="button" onclick="lightToggle('on')" class="btn btn-warning btn-lg ">Sun</button>
-                    <button type="button" onclick="lightToggle('on', 5)" class="btn btn-secondary btn-lg ">Moon</button>
-                    <button type="button" onclick="lightToggle('off')" class="btn btn-dark btn-lg ">Off</button>
+        <div v-show='!authenticated' v-cloak>
+            <div class="row">
+                <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+                <div class="card card-signin my-5">
+                    <div class="card-body">
+                    <h5 class="card-title text-center">Sign in</h5>
+                    <form class="form-signin">
+                        <div class="form-label-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" class="form-control" placeholder="Email address" required autofocus>
+                        </div>
+                        <div class="form-label-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="Password" required>
+                        </div>
+                        <br/>
+                        <button class="btn btn-lg btn-primary btn-block text-uppercase" @click="signin($event)">Sign in</button>
+                    </form>
+                    </div>
                 </div>
-                <div class="btn-group" style="width: 100%">
-                    <button type="button" onclick="lightToggleBg('on')" class="btn btn-warning btn-lg ">Ambiance on</button>
-                    <button type="button" onclick="lightToggleBg('on', 4)" class="btn btn-danger btn-lg ">Flow</button>
-                    <button type="button" onclick="lightToggleBg('off')" class="btn btn-dark btn-lg ">Ambiance Off</button>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-auto mx-auto">
-                <div id="hslPicker"></div>
+        <div v-show='authenticated' v-cloak>
+            <div class="row">
+                <div class="col-auto mx-auto">
+                    <h4 class="mx-auto">Light selection</h4>
+                    <table class="fixed_header table" id="tablefrom">
+                        <thead>
+                            <tr>
+                                <td>Name</td>
+                                <td>Type</td>
+                                <td>Power</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="lights.length == 0">
+                                <td>None</td>
+                                <td>OFF</td>
+                                <td>- %</td>
+                            </tr>
+                            <tr v-bind:class="{ selected: value.isSelected }" v-for="value in lights" @click="selectLight(value.name)" >
+                                <td>{{value.name}}</td>
+                                <td class="text-center border-left">{{value.power == 'off' ? 'OFF' : value.active_mode == '1' ? 'MOON': 'SUN' }}</td>
+                                <td class="text-center border-left">{{value.power == 'off' ? '- ' : value.bright}}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <h4 class="mx-auto">Control</h4>
+                    <div class="btn-group" style="width: 100%">
+                        <button type="button" onclick="lightToggle('on')" class="btn btn-warning btn-lg ">Sun</button>
+                        <button type="button" onclick="lightToggle('on', 5)" class="btn btn-secondary btn-lg ">Moon</button>
+                        <button type="button" onclick="lightToggle('off')" class="btn btn-dark btn-lg ">Off</button>
+                    </div>
+                    <div class="btn-group" style="width: 100%">
+                        <button type="button" onclick="lightToggleBg('on')" class="btn btn-warning btn-lg ">Ambiance on</button>
+                        <button type="button" onclick="lightToggleBg('on', 4)" class="btn btn-danger btn-lg ">Flow</button>
+                        <button type="button" onclick="lightToggleBg('off')" class="btn btn-dark btn-lg ">Ambiance Off</button>
+                    </div>
+                </div>
             </div>
-            <div class="col">
-                <h4>Foreground</h4>
-                Brightness:
-                <input type="range" id="brightness" min="1" max="100" value="50" class="slider">
-                Temperature:
-                <input type="range" id="temperature" min="2700" max="6500" value="3500" class="slider">
+            <div class="row">
+                <div class="col-auto mx-auto">
+                    <div id="hslPicker"></div>
+                </div>
+                <div class="col">
+                    <h4>Foreground</h4>
+                    Brightness:
+                    <input type="range" id="brightness" min="1" max="100" value="50" class="slider">
+                    Temperature:
+                    <input type="range" id="temperature" min="2700" max="6500" value="3500" class="slider">
+                </div>
+                <div class="col">
+                    <h4>Background</h4>
+                    Brightness:
+                    <input type="range" id="bg_brightness" min="1" max="100" value="50" class="slider">
+                    Temperature:
+                    <input type="range" id="bg_temperature" min="2700" max="6500" value="3500" class="slider">
+                </div>
             </div>
-            <div class="col">
-                <h4>Background</h4>
-                Brightness:
-                <input type="range" id="bg_brightness" min="1" max="100" value="50" class="slider">
-                Temperature:
-                <input type="range" id="bg_temperature" min="2700" max="6500" value="3500" class="slider">
-            </div>
-        </div>
-        <div class="row" v-if="false" v-cloak>
-            <div v-if="count_enabled() == 1" class="col-auto">
-                <h4>Configuration</h4>
-            <input type="text" class="form-control" placeholder="Name" id="name">
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" onclick="changeName()" id="name" type="button">Update</button>
-            </div>
-            </div>
+            <div class="row" v-if="false" v-cloak>
+                <div v-if="count_enabled() == 1" class="col-auto">
+                    <h4>Configuration</h4>
+                <input type="text" class="form-control" placeholder="Name" id="name">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" onclick="changeName()" id="name" type="button">Update</button>
+                </div>
+                </div>
 
+            </div>
         </div>
     </div>
-
     <script src="js/script.js"></script>
 </body>
 </html>

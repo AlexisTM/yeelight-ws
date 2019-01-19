@@ -6,7 +6,11 @@
   "dependencies": {
     "bufferutil": "^4.0.1",
     "express": "^4.16.4",
+    "md5": "^2.2.1",
+    "redis": "^2.8.0",
+    "redis-scanstreams": "^1.0.3",
     "utf-8-validate": "^5.0.2",
+    "uuid-token-generator": "^1.0.0",
     "ws": "^6.1.2",
     "yeelight-platform": "git+https://github.com/alexistm/yeelight-platform.git#master"
   },
