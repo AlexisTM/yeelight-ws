@@ -1,7 +1,6 @@
 var ws = {};
 var app = {};
 var test = {};
-var key = {};
 function addToListByName(value) {
   let index = app.lights.findIndex(function(element, b) {
     return element.name == value.name;
@@ -14,6 +13,28 @@ function addToListByName(value) {
     value.isSelected = false;
     app.lights.push(value);
   }
+}
+
+function setCookie(cname, cvalue, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + (exdays * 86400000));
+  var expires = "expires="+d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var ca = document.cookie.split(';');
+  for(var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
 }
 
 function selectLight(el) {
@@ -32,7 +53,7 @@ function changeName() {
 
 function send(topic, data, lights=[]) {
   let msg = {
-    "key": key,
+    "token": app.token,
     "topic": topic,
     "data": data,
     "lights": lights
@@ -78,7 +99,8 @@ function login(username, password) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      console.log(this.responseText);
+      app.token = this.responseText;
+      setCookie("token", this.responseText, 100);
     }
   };
   xhttp.open("GET", "login?username=" + username + "&password=" + password, true);
@@ -98,6 +120,7 @@ window.onload = function() {
     data: {
       lights: [],
       authenticated: false,
+      token: '',
       username: '',
       password: ''
     },
@@ -116,6 +139,7 @@ window.onload = function() {
         this.username = document.getElementById('username').value;
         this.password = md5(document.getElementById('password').value);
         this.authenticated = true;
+        login(this.username, this.password);
         return false;
       },
     },
@@ -136,6 +160,9 @@ window.onload = function() {
     cmdLights("hsv", [hue, sat, 'smooth', 300]);
   }).update();
 
+
+  let token = getCookie('token');
+  // only when token is set
   ws = new RobustWebSocket("ws://" + document.location.hostname + ":3030");
   ws.addEventListener('message', function(event) {
     let msg = JSON.parse(event.data);
