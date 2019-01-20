@@ -2,16 +2,41 @@ const express = require('express');
 const app = express()
 const port = 3000
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 3030, clientTracking: true });
+const redis = require("redis");
+const md5 = require('md5');
+const TokenGenerator = require('uuid-token-generator');
+const tokgen = new TokenGenerator();
 const YeeDevice = require('yeelight-platform').Device;
 const YeeConstants = require('yeelight-platform').Constants;
+const cookieParser = require('faster-cookie-parser');
+const config = require('./config');
 const attributes_names = ['name', 'active_mode', 'power', 'bright', 'ct', 'bg_power', 'bg_hue', 'bg_rgb', 'bg_sat', 'bg_ct'];
+
+const client = redis.createClient({ host: config.redis.ip });
+
+function verifyClient(info, done) {
+  let cookie = cookieParser(info.req.headers.cookie);
+  check_token(cookie.username, cookie.token, (success, data) => {
+    done(success);
+  });
+}
+
+const wss = new WebSocket.Server({ 
+  port: 3030, 
+  verifyClient:verifyClient, 
+  clientTracking: true
+});
 
 var lights = [];
 
-function addLight(name, ip, model=undefined) {
+// Users: alexis, vorleak, test:test
+// client.keys('users/alexis', console.log)
+// users/alexis:tokens_hey
+
+const SECS_IN_A_DAY = 86400;
+
+function addLight(ip, model=undefined) {
   let light = {
-    name: name,
     device: new YeeDevice({
       host: ip, 
       port: 55443,
@@ -33,9 +58,10 @@ function send(topic, data) {
   }
 }
 
-// Could be fetch via discovery service.
-addLight("living", "192.168.178.32", "ceiling4");
-addLight("dining", "192.168.178.33", "ceiling4");
+for (let {ip, type} of config.lights) {
+  console.log("Adding the light", type, "at", ip);
+  addLight(ip, type);
+}
 
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
@@ -80,4 +106,44 @@ for(let light of lights) {
 }
 
 app.use(express.static('www'));
+app.get("/login", function(req, res){
+  const {username, password} = req.query;
+  console.log(username, password)
+  if(username && password) {
+    client.get('users/' + username + ':mmd5', function(err, data) {
+      if(data == md5(password)) {
+        let token = tokgen.generate();
+        res.send(token);
+        client.set('users/' + username + ':token-'+token, token, 'EX', 10*86400);
+      } else {
+        res.status(403).send('FAIL');
+      };
+      res.end();
+    });
+  } else {
+    res.status(403).send('FAIL');
+  }
+});
+
+app.get("/check_token", function(req, res){
+  const {username, token} = req.query;
+  check_token(username, token, (result, data) => {
+    if(result) {
+      res.send('OK');
+    } else {
+      res.status(403).send('FAIL');
+    }
+  });
+});
+
+function check_token(username, token, callback) {
+  if(username && token) {
+    client.get('users/' + username + ':token-'+token, function(err, data) {
+        callback(data != null, data);
+    });
+  } else {
+    callback(false, null);
+  }
+}
+
 app.listen(port,  () => console.log(`Example app listening on port ${port}!`));
