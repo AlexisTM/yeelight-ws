@@ -8,8 +8,8 @@ const TokenGenerator = require('uuid-token-generator');
 const tokgen = new TokenGenerator();
 const YeeDevice = require('yeelight-platform').Device;
 const YeeConstants = require('yeelight-platform').Constants;
+const cookieParser = require('faster-cookie-parser');
 const config = require('./config');
-const cookieParser = require('./lib/cookie');
 const attributes_names = ['name', 'active_mode', 'power', 'bright', 'ct', 'bg_power', 'bg_hue', 'bg_rgb', 'bg_sat', 'bg_ct'];
 
 const client = redis.createClient({ host: config.redis.ip });
