@@ -154,6 +154,7 @@ window.onload = function() {
         this.authenticated = true;
         this.failed_to_connect = false;
         console.log(':D')
+        start_websocket();
       },
       signin_failure: function(evt) {
         this.authenticated = false;
