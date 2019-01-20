@@ -36,9 +36,20 @@ addLight("living", "192.168.178.32", "ceiling4");
 
 ## Redis db
 
+**Template** 
+
 ```javascript
 users/[username]:mmd5 = md5(md5(password)) // stores md5(md5(password))
 users/[username]:token-[token] = [token] // stores the valid tokens, they expire currently after 10 days, the data 
+```
+
+**Setup a user**
+
+```bash
+node setup.js
+#? Username:  AlexisTM
+#? Password:  [hidden]
+#? Roles:  admin, user
 ```
 
 ## Install and autoboot on a Raspberry Pi

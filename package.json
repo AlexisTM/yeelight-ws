@@ -6,6 +6,7 @@
   "dependencies": {
     "bufferutil": "^4.0.1",
     "express": "^4.16.4",
+    "inquirer": "^6.2.1",
     "md5": "^2.2.1",
     "redis": "^2.8.0",
     "redis-scanstreams": "^1.0.3",
