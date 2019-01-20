@@ -9,13 +9,16 @@ const tokgen = new TokenGenerator();
 const YeeDevice = require('yeelight-platform').Device;
 const YeeConstants = require('yeelight-platform').Constants;
 const config = require('./config');
+const cookieParser = require('./lib/cookie');
 const attributes_names = ['name', 'active_mode', 'power', 'bright', 'ct', 'bg_power', 'bg_hue', 'bg_rgb', 'bg_sat', 'bg_ct'];
 
 const client = redis.createClient({ host: config.redis.ip });
 
 function verifyClient(info, done) {
-  console.log(info.req.headers);
-  done(true);
+  let cookie = cookieParser(info.req.headers.cookie);
+  check_token(cookie.username, cookie.token, (success, data) => {
+    done(success);
+  });
 }
 
 const wss = new WebSocket.Server({ 
@@ -124,26 +127,23 @@ app.get("/login", function(req, res){
 
 app.get("/check_token", function(req, res){
   const {username, token} = req.query;
-  console.log(username, token)
+  check_token(username, token, (result, data) => {
+    if(result) {
+      res.send('OK');
+    } else {
+      res.status(403).send('FAIL');
+    }
+  });
+});
+
+function check_token(username, token, callback) {
   if(username && token) {
-    console.log("getting")
     client.get('users/' + username + ':token-'+token, function(err, data) {
-        console.log(data);
-        if(data == null) {
-          console.log("FAIL")
-          res.status(403).send('FAIL');
-        } else {
-          console.log("OK")
-          res.send('OK');
-        }
-       // res.send(token);
-       // res.status(403).send('FAIL');
+        callback(data != null, data);
     });
   } else {
-    console.log("invalid")
-    res.status(403).send('token or username not valid');
+    callback(false, null);
   }
-  console.log("end")
-  //res.end();
-});
+}
+
 app.listen(port,  () => console.log(`Example app listening on port ${port}!`));
