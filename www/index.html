@@ -32,6 +32,10 @@
                         </div>
                         <br/>
                         <button class="btn btn-lg btn-primary btn-block text-uppercase" @click="signin($event)">Sign in</button>
+                        <br/>                  
+                        <div v-show="failed_to_connect" class="alert alert-warning" v-cloak>
+                            <strong>Wrong password or username!</strong>
+                        </div>
                     </form>
                     </div>
                 </div>

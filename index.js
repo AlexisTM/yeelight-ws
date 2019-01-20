@@ -9,11 +9,16 @@ const TokenGenerator = require('uuid-token-generator');
 const tokgen = new TokenGenerator();
 
 function verifyClient(info, done) {
-  console.log(info);
+  console.log(info.req.headers);
   done(true);
 }
 
-const wss = new WebSocket.Server({ port: 3030, verifyClient:verifyClient, clientTracking: true });
+const wss = new WebSocket.Server({ 
+  port: 3030, 
+  verifyClient:verifyClient, 
+  clientTracking: true
+});
+
 const YeeDevice = require('yeelight-platform').Device;
 const YeeConstants = require('yeelight-platform').Constants;
 const attributes_names = ['name', 'active_mode', 'power', 'bright', 'ct', 'bg_power', 'bg_hue', 'bg_rgb', 'bg_sat', 'bg_ct'];
@@ -104,12 +109,40 @@ app.get("/login", function(req, res){
     client.get('users/' + username + ':mmd5', function(err, data) {
       if(data == md5(password)) {
         let token = tokgen.generate();
-        client.set('users/' + username + ':token', token, 'EX', 10*86400);
         res.send(token);
-      }
+        client.set('users/' + username + ':token-'+token, token, 'EX', 10*86400);
+      } else {
+        res.status(403).send('FAIL');
+      };
+      res.end();
     });
   } else {
-
+    res.status(403).send('FAIL');
   }
+});
+
+app.get("/check_token", function(req, res){
+  const {username, token} = req.query;
+  console.log(username, token)
+  if(username && token) {
+    console.log("getting")
+    client.get('users/' + username + ':token-'+token, function(err, data) {
+        console.log(data);
+        if(data == null) {
+          console.log("FAIL")
+          res.status(403).send('FAIL');
+        } else {
+          console.log("OK")
+          res.send('OK');
+        }
+       // res.send(token);
+       // res.status(403).send('FAIL');
+    });
+  } else {
+    console.log("invalid")
+    res.status(403).send('token or username not valid');
+  }
+  console.log("end")
+  //res.end();
 });
 app.listen(port,  () => console.log(`Example app listening on port ${port}!`));

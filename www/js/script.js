@@ -1,6 +1,7 @@
 var ws = {};
 var app = {};
 var test = {};
+var SECS_IN_A_DAY = 86400;
 function addToListByName(value) {
   let index = app.lights.findIndex(function(element, b) {
     return element.name == value.name;
@@ -53,7 +54,6 @@ function changeName() {
 
 function send(topic, data, lights=[]) {
   let msg = {
-    "token": app.token,
     "topic": topic,
     "data": data,
     "lights": lights
@@ -95,12 +95,20 @@ function bgTemperatureChange(evt) {
   cmdLights("bg_set_ct_abx", [parseInt(this.value), "smooth", 300]);
 }
 
-function login(username, password) {
-  var xhttp = new XMLHttpRequest();
+function tryToLogin(username, password) {
+  let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
+    test = this;
     if (this.readyState == 4 && this.status == 200) {
       app.token = this.responseText;
-      setCookie("token", this.responseText, 100);
+      console.log(app.token, app.username);
+      setCookie("token", app.token, 100);
+      setCookie("username", app.username, 100);
+      console.log(app.token, app.username);
+      app.signin_success();
+    } else if(this.readyState == 4 && this.status == 403) {
+      console.log("FAIL.")
+      app.signin_failure();
     }
   };
   xhttp.open("GET", "login?username=" + username + "&password=" + password, true);
@@ -120,6 +128,7 @@ window.onload = function() {
     data: {
       lights: [],
       authenticated: false,
+      failed_to_connect: false,
       token: '',
       username: '',
       password: ''
@@ -138,10 +147,19 @@ window.onload = function() {
         evt.preventDefault();
         this.username = document.getElementById('username').value;
         this.password = md5(document.getElementById('password').value);
-        this.authenticated = true;
-        login(this.username, this.password);
+        tryToLogin(this.username, this.password);
         return false;
       },
+      signin_success: function(evt) {
+        this.authenticated = true;
+        this.failed_to_connect = false;
+        console.log(':D')
+      },
+      signin_failure: function(evt) {
+        this.authenticated = false;
+        this.failed_to_connect = true,
+        console.log(":'(")
+      }
     },
   });
 
@@ -161,8 +179,31 @@ window.onload = function() {
   }).update();
 
 
-  let token = getCookie('token');
-  // only when token is set
+  app.token = getCookie('token');
+  app.username = getCookie('username');
+  if(app.token != '' && app.username != '') {
+    // Check token;
+    check_token();
+    // start_websocket();
+  }
+};
+
+function check_token() {
+  console.log(app.username, app.token)
+  let xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    test = this;
+    if (this.readyState == 4 && this.status == 200) {
+      app.signin_success();
+    } else if(this.readyState == 4 && this.status == 403) {
+      app.signin_failure();
+    }
+  };
+  xhttp.open("GET", "check_token?username=" + app.username + "&token=" + app.token, true);
+  xhttp.send();
+}
+
+function start_websocket() {
   ws = new RobustWebSocket("ws://" + document.location.hostname + ":3030");
   ws.addEventListener('message', function(event) {
     let msg = JSON.parse(event.data);
@@ -171,5 +212,4 @@ window.onload = function() {
       addToListByName(msg.data);
     }
   });
-
-};
+}
