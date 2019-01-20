@@ -1,7 +1,9 @@
 const redis = require('redis');
-const client = redis.createClient({ host: '192.168.178.23' });
 const md5 = require('md5');
 var inquirer = require('inquirer');
+
+const config = require('./config');
+const client = redis.createClient({ host: config.redis.ip });
 
 inquirer
   .prompt([

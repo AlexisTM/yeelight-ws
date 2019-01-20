@@ -1,0 +1,16 @@
+{
+    "redis": {
+        "ip": "192.168.178.23"
+    },
+    "discover_lights": false,
+    "lights": [
+        {
+            "ip": "192.168.178.32",
+            "type": "ceiling4"
+        },
+        {
+            "ip": "192.168.178.33",
+            "type": "ceiling4"
+        }
+    ]
+}

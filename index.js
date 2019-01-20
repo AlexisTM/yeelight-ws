@@ -3,10 +3,15 @@ const app = express()
 const port = 3000
 const WebSocket = require('ws');
 const redis = require("redis");
-const client = redis.createClient({ host: '192.168.178.23' });
 const md5 = require('md5');
 const TokenGenerator = require('uuid-token-generator');
 const tokgen = new TokenGenerator();
+const YeeDevice = require('yeelight-platform').Device;
+const YeeConstants = require('yeelight-platform').Constants;
+const config = require('./config');
+const attributes_names = ['name', 'active_mode', 'power', 'bright', 'ct', 'bg_power', 'bg_hue', 'bg_rgb', 'bg_sat', 'bg_ct'];
+
+const client = redis.createClient({ host: config.redis.ip });
 
 function verifyClient(info, done) {
   console.log(info.req.headers);
@@ -19,10 +24,6 @@ const wss = new WebSocket.Server({
   clientTracking: true
 });
 
-const YeeDevice = require('yeelight-platform').Device;
-const YeeConstants = require('yeelight-platform').Constants;
-const attributes_names = ['name', 'active_mode', 'power', 'bright', 'ct', 'bg_power', 'bg_hue', 'bg_rgb', 'bg_sat', 'bg_ct'];
-
 var lights = [];
 
 // Users: alexis, vorleak, test:test
@@ -31,9 +32,8 @@ var lights = [];
 
 const SECS_IN_A_DAY = 86400;
 
-function addLight(name, ip, model=undefined) {
+function addLight(ip, model=undefined) {
   let light = {
-    name: name,
     device: new YeeDevice({
       host: ip, 
       port: 55443,
@@ -55,9 +55,10 @@ function send(topic, data) {
   }
 }
 
-// Could be fetch via discovery service.
-addLight("living", "192.168.178.32", "ceiling4");
-addLight("dining", "192.168.178.33", "ceiling4");
+for (let {ip, type} of config.lights) {
+  console.log("Adding the light", type, "at", ip);
+  addLight(ip, type);
+}
 
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
