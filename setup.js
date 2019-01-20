@@ -31,7 +31,5 @@ inquirer
     let { username, password, roles } = answers;
     client.set('users/' + username + ':mmd5', md5(md5(password)))
     client.set('users/' + username + ':roles', JSON.stringify(roles))
-    client.get('users/' + username + ':mmd5', console.log)
-    client.get('users/' + username + ':roles', console.log)
     client.quit()
   });
