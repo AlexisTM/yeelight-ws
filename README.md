@@ -28,19 +28,28 @@ npm install
 node index.js
 ```
 
-Add your light IPs into the index.js. This can be replaced by the discovery service.
+**Install redis-server**
 
-```js
-addLight("living", "192.168.178.32", "ceiling4");
+```
+sudo apt install redis-server
 ```
 
-## Redis db
+**Setup of the config.json**
 
-**Template** 
+```js
+{
+    "redis": {
+        "ip": "192.168.178.23"
+    },
+    "discover_lights": false,
+    "lights": [
+        {
+            "ip": "192.168.178.32",
+            "type": "ceiling4"
+        }
+    ]
+}
 
-```javascript
-users/[username]:mmd5 = md5(md5(password)) // stores md5(md5(password))
-users/[username]:token-[token] = [token] // stores the valid tokens, they expire currently after 10 days, the data 
 ```
 
 **Setup a user**
@@ -52,6 +61,14 @@ node setup.js
 #? Roles:  admin, user
 ```
 
+## Redis db template
+
+```javascript
+users/[username]:mmd5 = md5(md5(password)) // stores md5(md5(password))
+users/[username]:roles = '["admin", "user"]' // roles
+users/[username]:token-[token] = [token] // stores the valid tokens, they expire currently after 10 days, the data 
+```
+
 ## Install and autoboot on a Raspberry Pi
 
 SSH with the user pi and install it the same way as on a desktop.
@@ -60,6 +77,7 @@ SSH with the user pi and install it the same way as on a desktop.
 git clone http://github.com/AlexisTM/yeelight-ws
 cd yeelight-ws
 npm install
+sudo apt install redis-server # will be at 127.0.0.1
 ```
 
 Enable the autoboot by creating the follwoing file `/etc/systemd/system/yeelight.service`
