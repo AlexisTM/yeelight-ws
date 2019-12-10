@@ -153,7 +153,7 @@ window.onload = function() {
       signin_success: function(evt) {
         this.authenticated = true;
         this.failed_to_connect = false;
-        console.log(':D')
+        start_websocket();
       },
       signin_failure: function(evt) {
         this.authenticated = false;
@@ -184,7 +184,6 @@ window.onload = function() {
   if(app.token != '' && app.username != '') {
     // Check token;
     check_token();
-    start_websocket();
   }
 };
 
