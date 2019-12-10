@@ -184,7 +184,7 @@ window.onload = function() {
   if(app.token != '' && app.username != '') {
     // Check token;
     check_token();
-    // start_websocket();
+    start_websocket();
   }
 };
 
