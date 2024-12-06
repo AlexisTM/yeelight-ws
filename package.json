@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "bufferutil": "^4.0.1",
-    "express": "^4.21.1",
+    "express": "^4.21.2",
     "faster-cookie-parser": "^1.0.0",
     "inquirer": "^6.2.1",
     "md5": "^2.2.1",
